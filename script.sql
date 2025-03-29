@@ -1,6 +1,4 @@
 DROP TABLE PERSONA CASCADE CONSTRAINTS;
-
-
 CREATE TABLE PERSONA (
     id          NUMBER NOT NULL PRIMARY KEY,
     nombre      VARCHAR(255),
@@ -99,6 +97,13 @@ CREATE TABLE APELLIDOS_FREC (
 
 ) REJECT LIMIT 5000;
 
+
+CREATE SEQUENCE secuencia_id_persona 
+    START WITH 1 
+    INCREMENT BY 1 
+    MINVALUE 1 
+    NOCYCLE 
+    CACHE 20;
 
 DECLARE
     -- bool status = false;
@@ -265,14 +270,7 @@ DECLARE
     
 BEGIN
 
-    -- devuelve 1 si existe la secuenca(ya se creo), 0 sino
-    SELECT COUNT(*) into vStatus
-        FROM user_sequences
-        WHERE sequence_name = 'SECUENCIA_ID_PERSONA';
-
-    IF vStatus = 1 THEN 
-        EXECUTE IMMEDIATE 'DROP SEQUENCE SECUENCIA_ID_PERSONA';
-    end if;
+    
 
     DBMS_OUTPUT.PUT_LINE('Generando ' || vNIdentidades || ' identidades' );
 
@@ -280,15 +278,16 @@ BEGIN
     -- secuencia_id_persona.nextval -> siguiente valor de la secuencia
     -- secuencia_id_persona.currval -> valor actual de la secuencia
     -- ejecutar la secuencia si no existe
-    vSql := 'CREATE SEQUENCE secuencia_id_persona ' ||
+    /*vSql := 'CREATE SEQUENCE secuencia_id_persona ' ||
             'START WITH 1 '                         ||
             'INCREMENT BY 1 '                       ||
             'MINVALUE 1 '                           ||
             'MAXVALUE ' || TO_CHAR(vNIdentidades)   || ' ' ||
             'NOCYCLE '                              ||
             'CACHE 20';
-    DBMS_OUTPUT.PUT_LINE(vSQL);
-    EXECUTE IMMEDIATE vSql;
+    DBMS_OUTPUT.PUT_LINE(vSql);
+    EXECUTE IMMEDIATE vSql;*/
+    
 
     FOR i in 1 .. vNIdentidades LOOP
         vIdsRandom := GenerarIDsDeIdentidadRandom();
@@ -307,6 +306,14 @@ BEGIN
             vIdentidad.mProvincia
         );
     END LOOP;
+    -- devuelve 1 si existe la secuenca(ya se creo), 0 sino
+    SELECT COUNT(*) into vStatus
+        FROM user_sequences
+        WHERE sequence_name = 'SECUENCIA_ID_PERSONA';
+
+    IF vStatus = 1 THEN 
+        EXECUTE IMMEDIATE 'DROP SEQUENCE SECUENCIA_ID_PERSONA';
+    end if;
 END; 
 /
 COMMIT;
